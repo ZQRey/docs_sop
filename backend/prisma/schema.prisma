@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+model Category {
+  id String @id @default(uuid())
+  name String
+  parentId String?
+  parent Category? @relation("Tree", fields: [parentId], references: [id], onDelete: Cascade)
+  children Category[] @relation("Tree")
+  orderIndex Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  documents Document[]
+}
+model Document {
+  id String @id @default(uuid())
+  categoryId String
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  title String
+  tags String[]
+  originalFilename String
+  filePath String
+  pdfPath String
+  mimeType String
+  fileSize BigInt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([tags], type: Gin)
+  @@index([categoryId])
+}
+model Admin {
+  id String @id @default(uuid())
+  username String @unique
+  passwordHash String
+  createdAt DateTime @default(now())
+}
